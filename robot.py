@@ -51,8 +51,8 @@ class Robot(QMainWindow):
 
     def _init_actor(self):
         self.actor = Actor(self.game, Rectangle(self.scr_1))
-        self.actor.router.updated.path.connect(self.map_view.slot_path)
-        self.actor.router.updated.zones.connect(self.map_view.slot_zones)
+        self.actor.route.updated.path.connect(self.map_view.slot_path)
+        self.actor.route.updated.zones.connect(self.map_view.slot_zones)
 
     def _init_timers(self):
         self.timer_keyboard = QTimer()

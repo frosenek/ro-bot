@@ -45,6 +45,8 @@ class Character(LivingEntity):
 
     def __init__(self, x: int, y: int):
         super(Character, self).__init__(None, None, x, y)
+        self.mouse_over_entity = False
+        self.mouse_clicked_entity = False
 
     def __repr__(self):
         r = f'Character ({self.x}, {self.y})'
@@ -58,13 +60,39 @@ class Mob(LivingEntity):
         super(Mob, self).__init__(*args)
 
     def __eq__(self, other):
-        return self.index == other.index and \
-               self.id == other.id
+        if other is None:
+            return False
+        else:
+            return self.index == other.index and self.id == other.id
 
     def __repr__(self):
         r = f'Mob {self.id} ({self.x}, {self.y})'
         r = r if self.health is None else f'{r}, {self.health}'
         return r
+
+
+class MouseOver:
+
+    def __init__(self):
+        self.player = False
+        self.char = False
+        self.mob = False
+        self.npc = False
+        self.warp = False
+        self.shop = False
+
+
+class MouseFocus:
+
+    def __init__(self):
+        self.mob = False
+
+
+class MouseState:
+
+    def __init__(self):
+        self.over = MouseOver()
+        self.focus = MouseFocus()
 
 
 class GameUpdateSignal(BaseObject):
@@ -82,6 +110,8 @@ class Game(BaseObject):
     def __init__(self, window_name, process_name: str):
         super(Game, self).__init__()
 
+        self.mouse_state = None
+
         self.window = Window(window_name)
         self.process = Process(process_name, Process.PROCESS_VM_READ)
         self.memory = self.process.memory
@@ -96,8 +126,51 @@ class Game(BaseObject):
 
     def read(self):
         self.read_map()
+        self.read_mouse_state()
         self.read_character()
         self.read_entities()
+
+    def read_mouse_state(self):
+        self.mouse_state = MouseState()
+
+        mouse_status_ptr = self.memory.read_ptr_chain(ct.c_ulong(), self.base, 0x62AA14)
+
+        # defines sprite of mouse pointer
+        # 0 => normal mouse
+        # 1 => speech bubble => npc
+        # 2 => pointing finger => shop, clickable buttons
+        # 4 => rotation (right-click)
+        # 5 => sword => mob
+        # 7 => door => warp
+        # 10 => skill circle
+        mouse_sprite = self.memory.read_uint32(mouse_status_ptr + 0xD0 - 0x7C)
+
+        # pointer that only gets set on mouse overs of players
+        mouse_over_player = self.memory.read_uint32(mouse_status_ptr + 0xD0 + 0x20)
+
+        # (likely) pointer or offset to a pointer that is set on all mouse overs except shops
+        # TODO: Figure out data(structure) at pointers location and what they point to exactly
+        mouse_over_entity = self.memory.read_uint32(mouse_status_ptr + 0xD0 + 0x274)
+
+        # set on clicking an entity (in case of mobs: gets set to 0 upon death)
+        mouse_focused_entity = self.memory.read_uint32(mouse_status_ptr + 0xD0 + 0x278)
+
+        self.mouse_state.focus.mob = mouse_focused_entity > 0
+
+        if mouse_over_entity > 0:
+            if mouse_over_player > 0:
+                self.mouse_state.over.player = True
+            elif mouse_sprite == 0:
+                self.mouse_state.over.char = True
+
+        if mouse_sprite == 1:
+            self.mouse_state.over.npc = True
+        elif mouse_sprite == 2:
+            self.mouse_state.over.shop = True
+        elif mouse_sprite == 5:
+            self.mouse_state.over.mob = True
+        elif mouse_sprite == 7:
+            self.mouse_state.over.warp = True
 
     def read_character(self):
         char_data_ptr = self.memory.read_ptr_chain(ct.c_ulong(), self.base, 0x62AA14, 0xD0, 0x3C)
