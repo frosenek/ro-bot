@@ -6,7 +6,8 @@ log = logging.getLogger('app.actor.fighter')
 log.setLevel(logging.DEBUG)
 
 # dictionary: target -> priority (lower value := higher priority)
-TARGET_PRIORITY_MAP = {1271: 1, 1077: 1}
+# TARGET_PRIORITY_MAP = {1048: 1}
+TARGET_PRIORITY_MAP = {1271: 1, 1077: 1} # alligator / poison spore
 
 
 # TARGET_PRIORITY_MAP = {1013: 1, 1092: 1}

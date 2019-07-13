@@ -1,11 +1,10 @@
+import ctypes as ct
+import logging
 from contextlib import suppress
 from ctypes.wintypes import *
 
-import ctypes as ct
-
-import psutil
-import logging
 import PyHook3
+import psutil
 import pythoncom
 
 from model.base import Rectangle
@@ -87,16 +86,7 @@ class Memory(object):
         log.debug(f'Base: {hex(addr)}, offset: {hex(offset)}')
         return self.read(ct.c_ulong(), addr + offset)
 
-    def read_ptr_chain(self, result, addr: int, *args):
-        """
-
-        :param result: Result variable
-        :param addr: Base address to read from
-        :param args: List of hex offsets added to pointers read in each step (if no offset set to 0x0).
-                     The amount of offsets defines the amount of indirect reads.
-                     E.g. args := (0x5C, 0x0, 0x0) => 3 indirect reads
-        :return:
-        """
+    def read_ptr_indirect(self, result, addr: int, *args):
         base = addr
 
         if len(args) == 0:
@@ -108,7 +98,7 @@ class Memory(object):
         if len(args) > 1:
             for o in args[:-1]:
                 if base != 0x0 and addr == 0x0:
-                    log.warning('Address in pointer chain has become 0x0 - maybe incorrect pointer?')
+                    log.warning('Address has become 0x0 - maybe incorrect pointer?')
                 addr = self.read_ptr(addr, o)
         return self.read(result, addr + args[-1])
 

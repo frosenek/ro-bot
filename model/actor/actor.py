@@ -48,6 +48,7 @@ class Input:
         self.screen = screen
         self.x = 0
         self.y = 0
+        self.occured = 0
         self.timed_keys = []
         self.timed_keys = [
             Key('f2', Timer(301)),  # two-hand quicken
@@ -73,11 +74,19 @@ class Input:
         self.translate_coordinates(start, target)
         atg.click(self.x, self.y)
 
-    def timed_events(self):
+    def mouse_double_click(self, start: Point, target: Point):
+        self.translate_coordinates(start, target)
+        atg.doubleClick(self.x, self.y)
+
+    def update(self):
+        if self.occured > 0:
+            self.occured = self.occured - 1
+
         for key in self.timed_keys:
             if key.timer.elapsed():
                 key.press()
                 key.timer.reset()
+                self.occured = 5
 
 
 class Actor:
@@ -95,7 +104,7 @@ class Actor:
         self.game.updated.entities.connect(self.fight.slot_entities)
 
     def act(self):
-        self.input.timed_events()
+        self.input.update()
         self.fight.update()
 
         if self.fight.has_target():
@@ -104,7 +113,10 @@ class Actor:
             elif self.game.mouse_state.over.mob:
                 self.input.mouse_click(self.fight.char, self.fight.target)
             else:
-                self.input.mouse_drag(self.fight.char, self.fight.target)
+                self.input.mouse_move(self.fight.char, self.fight.target)
+
+            if self.input.occured and self.game.mouse_state.focus.mob:
+                self.input.mouse_double_click(self.fight.char, self.fight.target)
             return
 
         self.route.update()

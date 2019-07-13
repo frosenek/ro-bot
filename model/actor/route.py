@@ -10,6 +10,37 @@ log_route = logging.getLogger('app.actor.router')
 log_path.setLevel(logging.WARNING)
 log_route.setLevel(logging.WARNING)
 
+PRT_SEW1_ROUTE = [
+    Rectangle(282, 297, 3, 3),
+    Rectangle(35, 297, 3, 3),
+    Rectangle(124, 261, 3, 3),
+    Rectangle(101, 237, 3, 3),
+    Rectangle(139, 182, 3, 3),
+    Rectangle(76, 180, 3, 3),
+    Rectangle(20, 263, 3, 3),
+    Rectangle(23, 232, 3, 3),
+    Rectangle(34, 181, 3, 3),
+    Rectangle(75, 150, 3, 3),
+    Rectangle(30, 115, 3, 3),
+    Rectangle(30, 82, 3, 3),
+    Rectangle(30, 48, 3, 3),
+    Rectangle(129, 147, 3, 3),
+    Rectangle(30, 20, 3, 3),
+    Rectangle(290, 20, 3, 3),
+    Rectangle(237, 49, 3, 3),
+    Rectangle(285, 49, 3, 3),
+    Rectangle(285, 83, 3, 3),
+    Rectangle(197, 154, 3, 3),
+    Rectangle(285, 116, 3, 3),
+    Rectangle(241, 149, 3, 3),
+    Rectangle(283, 200, 3, 3),
+    Rectangle(285, 233, 3, 3),
+    Rectangle(296, 263, 3, 3),
+    Rectangle(201, 259, 3, 3),
+    Rectangle(221, 231, 3, 3),
+    Rectangle(197, 183, 3, 3),
+]
+
 
 class Path(BaseObject):
 

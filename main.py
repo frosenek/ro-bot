@@ -1,6 +1,3 @@
-# import pyautogui
-# print(pyautogui.locateOnScreen('kafra.bmp', region=(0, 0, 1920, 1080), grayscale=True, confidence=0.8))
-
 from PySide2.QtWidgets import QApplication
 
 import sys

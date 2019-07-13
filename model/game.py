@@ -133,7 +133,7 @@ class Game(BaseObject):
     def read_mouse_state(self):
         self.mouse_state = MouseState()
 
-        mouse_status_ptr = self.memory.read_ptr_chain(ct.c_ulong(), self.base, 0x62AA14)
+        mouse_status_ptr = self.memory.read_ptr_indirect(ct.c_ulong(), self.base, 0x62AA14)
 
         # defines sprite of mouse pointer
         # 0 => normal mouse
@@ -142,6 +142,7 @@ class Game(BaseObject):
         # 4 => rotation (right-click)
         # 5 => sword => mob
         # 7 => door => warp
+        # 9 => grab item
         # 10 => skill circle
         mouse_sprite = self.memory.read_uint32(mouse_status_ptr + 0xD0 - 0x7C)
 
@@ -173,7 +174,7 @@ class Game(BaseObject):
             self.mouse_state.over.warp = True
 
     def read_character(self):
-        char_data_ptr = self.memory.read_ptr_chain(ct.c_ulong(), self.base, 0x62AA14, 0xD0, 0x3C)
+        char_data_ptr = self.memory.read_ptr_indirect(ct.c_ulong(), self.base, 0x62AA14, 0xD0, 0x3C)
 
         # target coordinate that the character is currently moving to
         # target_x = self.memory.read_uint32(char_data_ptr + 0x140)
@@ -221,9 +222,9 @@ class Game(BaseObject):
     #   node.next -> 0x0
     #   node.prev -> 0x4
     def read_entities(self):
-        base = self.memory.read_ptr_chain(ct.c_ulong(), self.base, 0x62AA14, 0xD0)
+        base = self.memory.read_ptr_indirect(ct.c_ulong(), self.base, 0x62AA14, 0xD0)
         size = self.memory.read_uint32(base + 0x14 + 0x4)
-        node = self.memory.read_ptr_chain(ct.c_ulong(), base, 0x14, 0x0)
+        node = self.memory.read_ptr_indirect(ct.c_ulong(), base, 0x14, 0x0)
 
         self.mobs, self.npcs, self.players = [], [], []
         while size > 0:
